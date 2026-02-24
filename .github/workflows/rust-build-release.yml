@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   build-release:
-    runs-on: ubuntu-latest
+    runs-on: macos-14
     timeout-minutes: 60
     defaults:
       run:
@@ -20,14 +20,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-
-      - name: Install Linux build dependencies
-        run: |
-          set -euo pipefail
-          sudo apt-get update -y
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            pkg-config \
-            libcap-dev
 
       - name: Setup Rust toolchain
         uses: dtolnay/rust-toolchain@1.93.0
@@ -54,7 +46,7 @@ jobs:
       - name: Upload codex binary
         uses: actions/upload-artifact@v6
         with:
-          name: codex-linux-x64
+          name: codex-macos-arm64
           path: codex-rs/target/release/codex
           if-no-files-found: error
           compression-level: 0
