@@ -1,0 +1,32 @@
+name: rust-build-release
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feat/request-user-input-default-mode
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: codex-rs
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Install Linux build dependencies
+        run: |
+          set -euo pipefail
+          sudo apt-get update -y
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            pkg-config \
+            libcap-dev
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@1.93.0
+
+      - name: Build release
+        run: cargo build --release
