@@ -6,12 +6,14 @@ on:
     branches:
       - feat/request-user-input-default-mode
 
+concurrency:
+  group: rust-build-release-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-release:
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    env:
-      CARGO_BUILD_JOBS: 2
     defaults:
       run:
         working-directory: codex-rs
@@ -30,6 +32,11 @@ jobs:
       - name: Setup Rust toolchain
         uses: dtolnay/rust-toolchain@1.93.0
 
+      - name: Cache Rust build artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "codex-rs -> target"
+
       - name: Build release
         run: |
           set -euo pipefail
@@ -41,5 +48,13 @@ jobs:
           ) &
           KEEPALIVE_PID=$!
           trap 'kill "$KEEPALIVE_PID" 2>/dev/null || true' EXIT
-          cargo build --release -p codex-cli
+          cargo build --release -p codex-cli --bin codex --locked
           kill "$KEEPALIVE_PID" 2>/dev/null || true
+
+      - name: Upload codex binary
+        uses: actions/upload-artifact@v6
+        with:
+          name: codex-linux-x64
+          path: codex-rs/target/release/codex
+          if-no-files-found: error
+          compression-level: 0
