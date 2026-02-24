@@ -10,6 +10,8 @@ jobs:
   build-release:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      CARGO_BUILD_JOBS: 2
     defaults:
       run:
         working-directory: codex-rs
@@ -29,4 +31,4 @@ jobs:
         uses: dtolnay/rust-toolchain@1.93.0
 
       - name: Build release
-        run: cargo build --release
+        run: cargo build --release -p codex-cli
