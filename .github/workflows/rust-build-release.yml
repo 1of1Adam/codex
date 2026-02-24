@@ -31,4 +31,15 @@ jobs:
         uses: dtolnay/rust-toolchain@1.93.0
 
       - name: Build release
-        run: cargo build --release -p codex-cli
+        run: |
+          set -euo pipefail
+          (
+            while true; do
+              echo "[keepalive] release build still running at $(date -u +%H:%M:%S)"
+              sleep 60
+            done
+          ) &
+          KEEPALIVE_PID=$!
+          trap 'kill "$KEEPALIVE_PID" 2>/dev/null || true' EXIT
+          cargo build --release -p codex-cli
+          kill "$KEEPALIVE_PID" 2>/dev/null || true
